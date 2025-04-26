@@ -5,6 +5,18 @@
   "stations_csv": "stations.csv",
   "output_csv": "parsed_wban_data.csv",
   "redis_host": "localhost",
+  "input_csv": "input.csv",
+  "output_csv": "output.csv",
+  "proxies": [
+    "http://51.158.123.35:8811",
+    "http://185.199.228.100:8080",
+    "http://138.201.223.250:31288"
+  ],
+  "emails": [
+    "email1@example.com",
+    "email2@example.com",
+    "email3@example.com"
+  ],
   "redis_port": 6379,
   "redis_db": 0,
   "download_pause_sec": 0.5,
