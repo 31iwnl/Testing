@@ -42,7 +42,7 @@ def save_stations_to_csv(stations, output_file):
         logging.warning("No stations to save.")
         return
 
-    fieldnames = stations[0].keys()  # Get all fieldnames from the first station
+    fieldnames = stations[0].keys()
     with open(output_file, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
