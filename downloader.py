@@ -160,10 +160,8 @@ class FTPAgent:
             return
 
         self.set_redis_mdtm(ftp_path, mdtm_iso)
-
-        # Limit queue size
         queue_len = self.redis_client.llen('file_queue')
-        queue_limit = 3  # Setting Queue Limit Here
+        queue_limit = 3
 
         if queue_len < queue_limit:
             self.redis_client.rpush('file_queue', local_op)
