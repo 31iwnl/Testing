@@ -1,0 +1,12 @@
+{
+  "ftp_host": "ftp.ncdc.noaa.gov",
+  "ftp_base_dir": "pub/data/gsod",
+  "data_dir": "data",
+  "stations_csv": "stations.csv",
+  "output_csv": "parsed_wban_data.csv",
+  "redis_host": "localhost",
+  "redis_port": 6379,
+  "redis_db": 0,
+  "download_pause_sec": 0.5,
+  "parser_sleep_sec": 1
+}
