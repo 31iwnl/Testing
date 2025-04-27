@@ -110,7 +110,6 @@ def parse_line_by_fields(line, fields):
         except Exception:
             record[name] = val.strip()
 
-    # Конвертируем единицы измерения
     record = convert_units(record)
     return record
 

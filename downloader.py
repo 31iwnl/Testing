@@ -10,24 +10,19 @@ import redis
 import csv
 import sys
 
-# Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-# Загрузка конфигурации из файла
 with open('config.json', 'r', encoding='utf-8') as f:
     config = json.load(f)
 
-# Параметры FTP-сервера
 FTP_HOST = config['ftp_host']
 FTP_BASE_DIR = config['ftp_base_dir']
 DATA_DIR = config['data_dir']
 
-# Параметры Redis
 REDIS_HOST = config['redis_host']
 REDIS_PORT = config['redis_port']
 REDIS_DB = config['redis_db']
 
-# CSV файл со списком разрешенных станций
 OUTPUT_CSV = config.get('output_csv', 'output.csv')
 
 
@@ -149,19 +144,14 @@ class FTPAgent:
         local_gz = os.path.join(self.local_dir, filename)
         local_op = local_gz[:-3]
 
-        # 1. Получаем MDTM файла с FTP
         mdtm = self.get_ftp_file_mdtm(filename)
         mdtm_iso = mdtm.isoformat() if mdtm else None
-
-        # 2. Проверяем, есть ли запись о файле в Redis и совпадает ли MDTM
         redis_mdtm = self.get_redis_mdtm(ftp_path)
         if redis_mdtm == mdtm_iso:
             logging.info(f'Файл {filename} уже обработан (найден в Redis с совпадающим MDTM), пропуск скачивания')
             return
-
-        # 3. Если файла нет в Redis или MDTM не совпадает - скачиваем
-        # ПЕРЕД скачиванием, проверяем еще раз, что файла нет в редисе.
-        redis_mdtm = self.get_redis_mdtm(ftp_path)  # Получаем MDTM из Redis еще раз
+        # Если файла нет в Redis или MDTM не совпадает - скачиваем
+        redis_mdtm = self.get_redis_mdtm(ftp_path)
         if redis_mdtm == mdtm_iso:  # Если MDTM совпадает, то пропускаем скачивание
             logging.info(f'Файл {filename} уже обработан (найден в Redis с совпадающим MDTM), пропуск скачивания')
             return
@@ -191,6 +181,7 @@ class FTPAgent:
 
         queue_len = self.redis_client.llen('file_queue')
         logging.info(f'Текущая длина очереди Redis: {queue_len}')
+
     def download_year_files(self, year):
         try:
             self.ftp.cwd(year)
@@ -218,20 +209,20 @@ class FTPAgent:
                 continue
 
             # Проверяем, нужно ли скачивать файл
-            should_download = False #Добавил, чтобы решить проблему с логированием
+            should_download = False
             # Проверяем, есть ли запись о файле в Redis и совпадает ли MDTM
             ftp_path = f'{FTP_BASE_DIR}/{year}/{fname}'
             redis_mdtm = self.get_redis_mdtm(ftp_path)
             mdtm = self.get_ftp_file_mdtm(fname)
             mdtm_iso = mdtm.isoformat() if mdtm else None
-            if redis_mdtm != mdtm_iso: #Если не совпадает, то нужно качать
+            if redis_mdtm != mdtm_iso:  # Если не совпадает, то нужно качать
                 should_download = True
 
             self.download_and_unpack(year, fname)
 
             time.sleep(config['download_pause_sec'])
 
-            if should_download: #Логируем, только если нужно было скачать
+            if should_download:  # Логируем, только если нужно было скачать
                 logging.info(f'Скачано {i}/{len(op_files)} файлов за год {year}')
 
         self.ftp.cwd('..')

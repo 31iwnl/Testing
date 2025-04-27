@@ -19,12 +19,11 @@ def main():
 
     stations_cmd = [python, 'stations_catalog.py']
     stations_proc = None
-    stations_last_run = 0  # время последнего завершения
-    stations_cooldown = 5 * 60  # 5 минут в секундах
+    stations_last_run = 0
+    stations_cooldown = 5 * 60
 
     try:
         while True:
-            # Перезапускаем downloader и parser_worker при падении
             for name in ['downloader.py', 'parser_worker.py']:
                 proc = procs[name]
                 retcode = proc.poll()
@@ -34,21 +33,18 @@ def main():
 
             now = time.time()
 
-            # Проверяем состояние stations_catalog.py
             if stations_proc is None:
-                # Если процесс не запущен, проверяем, можно ли запускать
                 if now - stations_last_run >= stations_cooldown:
                     stations_proc = run_process(stations_cmd, 'stations_catalog.py')
                 else:
                     remaining = int(stations_cooldown - (now - stations_last_run))
                     logging.debug(f'Ждём {remaining} сек до следующего запуска stations_catalog.py')
             else:
-                # Если процесс запущен, проверяем, завершился ли он
                 retcode = stations_proc.poll()
                 if retcode is not None:
                     logging.info(f'stations_catalog.py завершился с кодом {retcode}')
                     stations_proc = None
-                    stations_last_run = now  # фиксируем время завершения
+                    stations_last_run = now
 
             time.sleep(5)
 
