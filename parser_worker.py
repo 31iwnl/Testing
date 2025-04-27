@@ -12,7 +12,7 @@ with open('config.json', 'r', encoding='utf-8') as f:
     config = json.load(f)
 
 DATA_DIR = config['data_dir']
-OUTPUT_CSV = config['output_csv']
+OUTPUT_CSV = config['parsed_csv']
 
 REDIS_HOST = config['redis_host']
 REDIS_PORT = config['redis_port']
@@ -37,6 +37,65 @@ def parse_header_line(header_line):
     return fields
 
 
+def safe_float(val):
+    try:
+        return float(val)
+    except Exception:
+        return None
+
+
+def f_to_c(f):
+    if f is None:
+        return ''
+    return round((f - 32) * 5.0 / 9.0, 2)
+
+
+def inch_to_mm(inch):
+    if inch is None:
+        return ''
+    return round(inch * 25.4, 2)
+
+
+def mph_to_mps(mph):
+    if mph is None:
+        return ''
+    return round(mph * 0.44704, 2)
+
+
+def mile_to_km(mile):
+    if mile is None:
+        return ''
+    return round(mile * 1.60934, 2)
+
+
+def convert_units(record):
+    # Температуры (F -> C)
+    temp_fields = ['TEMP', 'DEWP', 'MAX', 'MIN']
+    for f in temp_fields:
+        val = safe_float(record.get(f))
+        record[f] = f_to_c(val)
+
+    # Видимость (мили -> км)
+    visib_val = safe_float(record.get('VISIB'))
+    record['VISIB'] = mile_to_km(visib_val)
+
+    # Скорость ветра (миль/ч -> м/с)
+    wind_fields = ['WDSP', 'MXSPD', 'GUST']
+    for f in wind_fields:
+        val = safe_float(record.get(f))
+        record[f] = mph_to_mps(val)
+
+    # Осадки (дюймы -> мм)
+    prcp_val = safe_float(record.get('PRCP'))
+    record['PRCP'] = inch_to_mm(prcp_val)
+
+    # Снег (дюймы -> мм)
+    sndp_val = safe_float(record.get('SNDP'))
+    record['SNDP'] = inch_to_mm(sndp_val)
+
+    return record
+
+
 def parse_line_by_fields(line, fields):
     record = {}
     for name, start, end in fields:
@@ -50,6 +109,9 @@ def parse_line_by_fields(line, fields):
             record[name] = val_float
         except Exception:
             record[name] = val.strip()
+
+    # Конвертируем единицы измерения
+    record = convert_units(record)
     return record
 
 
@@ -104,7 +166,6 @@ def parse_op_file(file_path):
             if 'flag' not in [fn.lower() for fn in fieldnames]:
                 fieldnames.append('flag')
 
-            logging.info(f'Поля из заголовка: {fieldnames}')
 
             for line_num, line in enumerate(f, start=2):
                 if len(line) < fields[-1][2]:

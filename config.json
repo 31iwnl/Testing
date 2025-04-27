@@ -4,8 +4,9 @@
   "data_dir": "data",
   "stations_csv": "stations.csv",
   "output_csv": "parsed_wban_data.csv",
+  "parsed_csv": "parsed.csv",
   "redis_host": "localhost",
-  "input_csv": "input.csv",
+  "input_csv": "isd-history.csv",
   "output_csv": "output.csv",
   "proxies": [
     "http://51.158.123.35:8811",
