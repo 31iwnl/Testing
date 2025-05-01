@@ -1,0 +1,25 @@
+{
+  "ftp_host": "ftp.ncdc.noaa.gov",
+  "ftp_base_dir": "pub/data/gsod",
+  "data_dir": "data",
+  "parsed_csv": "parsed.csv",
+  "space_weather": "space_weather.csv",
+  "redis_host": "localhost",
+  "input_csv": "input.csv",
+  "output_csv": "output.csv",
+  "redis_port": 6379,
+  "redis_db": 0,
+  "download_pause_sec": 0.5,
+  "parser_sleep_sec": 1,
+  "postgres": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "weather_db",
+    "user": "postgres",
+    "password": "trtZKWbe3avLJR",
+    "tables": {
+      "ftp": "ftp_parsed_data",
+      "space_weather": "space_weather_data"
+    }
+  }
+}
